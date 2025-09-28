@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>n8n Workflow Sync Status</title>
-    <script type="text/javascript" nonce="c722fe5908474939b7c796e9945" src="//local.adguard.org?ts=1758961045674&amp;type=content-script&amp;dmn=parsedventures.com&amp;url=https%3A%2F%2Fparsedventures.com%2Fn8n-dashboard-v2.html&amp;app=com.google.Chrome&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="c722fe5908474939b7c796e9945" src="//local.adguard.org?ts=1758961045674&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Assistant&amp;type=user-script"></script><link rel="preconnect" href="https://fonts.googleapis.com">
+    <script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;type=content-script&amp;dmn=n8n.prospana.com&amp;url=https%3A%2F%2Fn8n.prospana.com%2Fwebhook%2F1edbb326-bc24-4c89-bd70-90f17f125334%3Ftab%3Dsynced&amp;app=com.google.Chrome&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Assistant&amp;type=user-script"></script><link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -824,7 +824,7 @@
                                 <a id="tab-synced" class="tab active-tab"><span>Synced Workflows</span><span id="count-synced" class="tab-count green"></span></a>
                                 <a id="tab-n8n-only" class="tab"><span>In n8n only</span><span id="count-n8n-only" class="tab-count orange"></span></a>
                                 <a id="tab-github-only" class="tab"><span>In GitHub only</span><span id="count-github-only" class="tab-count grey"></span></a>
-                                <!-- <a id="tab-about" class="tab"><span>About</span></a> -->
+                                <a id="tab-about" class="tab"><span>About</span></a>
                             </div>
                         </div>
                     </div>
@@ -883,9 +883,9 @@
         // --- CONFIGURATION ---
         // In a real scenario, this would be dynamically injected or configured.
         const config = {
-            n8nInstanceUrl: "{{ $json.instance_url }}",
+            n8nInstanceUrl: "https://n8n.prospana.com",
             // The base URL for the webhook that serves the dashboard and handles actions.
-            dashboardApiUrl: "{{ $json.instance_url }}/{{ $json.webhook_path }}/{{$json.webhook_actions}}",
+            dashboardApiUrl: "https://n8n.prospana.com/webhook/90dad0ac-e16c-4b42-8655-f534213546d7",
             endpoints: {
                 // METHOD: GET
                 // URL: (dashboardApiUrl)?action=fetchAllWorkflows
