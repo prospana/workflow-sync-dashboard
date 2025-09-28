@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>n8n Workflow Sync Status</title>
-    <script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;type=content-script&amp;dmn=n8n.prospana.com&amp;url=https%3A%2F%2Fn8n.prospana.com%2Fwebhook%2F1edbb326-bc24-4c89-bd70-90f17f125334%3Ftab%3Dsynced&amp;app=com.google.Chrome&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Assistant&amp;type=user-script"></script><link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- <script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;type=content-script&amp;dmn=n8n.prospana.com&amp;url=https%3A%2F%2Fn8n.prospana.com%2Fwebhook%2F1edbb326-bc24-4c89-bd70-90f17f125334%3Ftab%3Dsynced&amp;app=com.google.Chrome&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Assistant&amp;type=user-script"></script><link rel="preconnect" href="https://fonts.googleapis.com"> -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -807,10 +807,10 @@
                             <span class="text-medium text-light">An overview of workflows synced between n8n and GitHub</span>
                         </div>
                         <div class="header-actions">
-                            <a href="https://n8narena.com/workflows/" target="_blank" rel="noopener noreferrer" class="button secondary">
+                            <!-- <a href="https://n8narena.com/workflows/" target="_blank" rel="noopener noreferrer" class="button secondary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
                                 <span>Browse Templates</span>
-                            </a>
+                            </a> -->
                             <button id="create-workflow-btn" class="button primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                                 <span>Create Workflow</span>
@@ -824,7 +824,7 @@
                                 <a id="tab-synced" class="tab active-tab"><span>Synced Workflows</span><span id="count-synced" class="tab-count green"></span></a>
                                 <a id="tab-n8n-only" class="tab"><span>In n8n only</span><span id="count-n8n-only" class="tab-count orange"></span></a>
                                 <a id="tab-github-only" class="tab"><span>In GitHub only</span><span id="count-github-only" class="tab-count grey"></span></a>
-                                <a id="tab-about" class="tab"><span>About</span></a>
+                                <!-- <a id="tab-about" class="tab"><span>About</span></a> -->
                             </div>
                         </div>
                     </div>
@@ -941,7 +941,7 @@
             synced: document.getElementById('tab-synced'),
             n8nOnly: document.getElementById('tab-n8n-only'),
             githubOnly: document.getElementById('tab-github-only'),
-            about: document.getElementById('tab-about'),
+            // about: document.getElementById('tab-about'),
         };
         const cardsContainer = document.getElementById('workflow-cards-container');
         const aboutContentContainer = document.getElementById('about-content-container');
