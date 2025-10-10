@@ -1,0 +1,1544 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n8n Workflow Sync Status</title>
+    <!-- <script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;type=content-script&amp;dmn=n8n.fanfinders.dev&amp;url=https%3A%2F%2Fn8n.fanfinders.dev%2Fwebhook%2F1edbb326-bc24-4c89-bd70-90f17f125334%3Ftab%3Dsynced&amp;app=com.google.Chrome&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="b32774913e2d43bbbea29e12bc2" src="//local.adguard.org?ts=1759075313755&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Assistant&amp;type=user-script"></script><link rel="preconnect" href="https://fonts.googleapis.com"> -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+    /* Core Variables & Base Styles */
+    :root {
+        --color-primary: #ff6f5c;
+        --color-primary-tint: #ffebe9;
+        --color-primary-icon-button: var(--color-primary);
+        --color-accent-purple: #8287EB;
+        --color-accent-orange: #DDBB1A;
+        --color-secondary: #4a4a4a;
+        --color-success: #20B69E;
+        --color-success-dark: #176363;
+        --color-text-dark: #101330;
+        --color-text-base: #656d76;
+        --color-text-light: #8c959f;
+        --color-grey-200: #E4E6EC;
+        --color-grey-700: #707183;
+        --color-background-light: #f6f8fa;
+        --color-background-xlight: #ffffff;
+        --color-border: #d0d7de;
+        --border-radius-base: 4px;
+        --border-radius-large: 8px;
+        --font-family: 'Rubik', sans-serif;
+        --font-weight-regular: 400;
+        --font-weight-medium: 500;
+        --font-weight-bold: 600;
+    }
+
+    body {
+        margin: 0;
+        font-family: var(--font-family);
+        background-color: var(--color-background-light);
+        color: var(--color-text-dark);
+    }
+
+    /* Layout */
+    #app-grid {
+        display: grid;
+        height: 100vh;
+        grid-template-areas: "header" "content";
+        grid-template-rows: auto 1fr;
+    }
+
+    #header {
+        grid-area: header;
+    }
+
+    #content {
+        grid-area: content;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .content-wrapper {
+        max-width: 1280px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 0;
+    }
+
+    /* Header */
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .main-heading-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .header-details .heading-xlarge {
+        font-size: 1.75rem;
+        font-weight: var(--font-weight-bold);
+        margin: 0;
+    }
+
+    .header-details .text-medium {
+        font-size: 1rem;
+        color: var(--color-text-base);
+    }
+
+    /* Buttons */
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: var(--font-weight-medium);
+        border-radius: var(--border-radius-base);
+        transition: all 0.2s ease-in-out;
+        padding: 8px 16px;
+        font-size: 0.875rem;
+        position: relative;
+    }
+
+    .button.primary {
+        background-color: var(--color-primary);
+        color: var(--color-background-xlight);
+        border-color: var(--color-primary);
+    }
+
+    .button.primary:hover {
+        opacity: 0.9;
+    }
+
+    .button.secondary {
+        background-color: var(--color-background-xlight);
+        color: var(--color-text-base);
+        border-color: var(--color-border);
+        text-decoration: none;
+    }
+
+    .button.secondary:hover {
+        background-color: var(--color-background-light);
+    }
+
+    .button.import {
+        background-color: var(--color-accent-purple);
+        color: var(--color-background-xlight);
+        border-color: var(--color-accent-purple);
+    }
+
+    .button.import:hover {
+        opacity: 0.9;
+    }
+
+    .button.mini {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .button.icon-only {
+        background-color: var(--color-background-xlight);
+        border-color: var(--color-border);
+        color: var(--color-text-base);
+        padding: 6px;
+        line-height: 1;
+        border-radius: 50%;
+    }
+
+    .button.icon-only:hover {
+        color: var(--color-text-dark);
+        background-color: var(--color-background-light);
+    }
+
+    .button.icon-only.primary {
+        background-color: var(--color-primary-icon-button);
+        border-color: var(--color-primary-icon-button);
+        color: var(--color-background-xlight);
+    }
+
+    .button.icon-only.primary:hover {
+        opacity: 0.9;
+    }
+
+    .button.icon-only svg {
+        margin-right: 0;
+    }
+
+    .button-group {
+        display: inline-flex;
+    }
+    .button-group > .button {
+        margin: 0;
+        border-radius: 0;
+    }
+    .button-group > .button:not(:last-child) {
+        border-right: none;
+    }
+    .button-group > .button:first-child {
+        border-top-left-radius: var(--border-radius-base);
+        border-bottom-left-radius: var(--border-radius-base);
+    }
+    .button-group > .button:last-child {
+        border-top-right-radius: var(--border-radius-base);
+        border-bottom-right-radius: var(--border-radius-base);
+    }
+    .button-group > .button.js-custom-sync-toggle {
+        border-left: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .button-group > .button.js-custom-sync-toggle svg {
+        margin-right: 0;
+    }
+
+    .custom-commit-form {
+        display: none;
+        margin-top: 8px;
+    }
+
+    .card.is-custom-sync-open .custom-commit-form {
+        display: flex;
+    }
+
+    .custom-commit-form input {
+        flex-grow: 1;
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
+        padding: 6px 8px;
+        font-size: 0.875rem;
+    }
+
+    .custom-commit-form input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px var(--color-primary-tint);
+        position: relative;
+        z-index: 1;
+    }
+
+    .custom-commit-form .js-custom-sync-submit {
+        border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
+        margin-left: -1px;
+    }
+
+    .button .button-spinner {
+        display: none;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        width: 1em;
+        height: 1em;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .button.is-loading > *:not(.button-spinner) {
+        visibility: hidden;
+    }
+
+    .button.is-loading .button-spinner {
+        display: block;
+        position: absolute;
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+        position: absolute;
+        display: none;
+        background-color: var(--color-background-xlight);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-base);
+        box-shadow: 0 4px 12px rgba(16, 19, 48, 0.1);
+        z-index: 100;
+        min-width: 160px;
+        padding: 4px 0;
+    }
+
+    .dropdown-menu.is-visible {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: block;
+        padding: 8px 12px;
+        color: var(--color-text-dark);
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--color-background-light);
+    }
+
+    .button svg {
+        margin-right: 6px;
+    }
+
+    .js-toggle-commit-history .icon-closed {
+        display: inline-flex;
+    }
+
+    .js-toggle-commit-history .icon-open {
+        display: none;
+    }
+
+    .card.is-expanded .js-toggle-commit-history .icon-open {
+        display: inline-flex;
+    }
+
+    .card.is-expanded .js-toggle-commit-history .icon-closed {
+        display: none;
+    }
+
+    /* Tabs */
+    .tabs-container {
+        margin-bottom: 24px;
+    }
+
+    .n8n-tabs .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .tab {
+        padding: 8px 16px;
+        cursor: pointer;
+        color: var(--color-text-base);
+        font-weight: var(--font-weight-medium);
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .tab:hover {
+        color: var(--color-text-dark);
+    }
+
+    .tab.active-tab {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+
+    .tab-count {
+        margin-left: 8px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: var(--font-weight-medium);
+        color: var(--color-background-xlight);
+        line-height: 1.5;
+    }
+
+    .tab-count.green {
+        background-color: var(--color-success-dark);
+    }
+
+    .tab-count.orange {
+        background-color: var(--color-accent-orange);
+        color: var(--color-text-dark);
+    }
+
+    .tab-count.grey {
+        background-color: var(--color-grey-200);
+        color: var(--color-grey-700);
+    }
+
+    .main-content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-border) transparent;
+    }
+
+    .main-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .main-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .main-content::-webkit-scrollbar-thumb {
+        background-color: var(--color-border);
+        border-radius: 4px;
+    }
+
+    /* Workflow Cards */
+    .list-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .card {
+        background-color: var(--color-background-xlight);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-large);
+        padding: 16px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .card-inner-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card:hover {
+        box-shadow: 0 2px 8px rgba(16, 19, 48, 0.07);
+    }
+
+    .card.is-archived {
+        background-image: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 10px,
+            rgba(228, 230, 236, 0.7) 10px,
+            rgba(228, 230, 236, 0.7) 11px
+        );
+    }
+
+    .card.is-archived .card-heading a {
+        color: var(--color-text-light);
+    }
+
+    .commit-history-container {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .card.is-expanded .commit-history-container {
+        display: block;
+    }
+
+    .commit-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 12px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-border) transparent;
+    }
+
+    .commit-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .commit-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .commit-list::-webkit-scrollbar-thumb {
+        background-color: var(--color-border);
+        border-radius: 4px;
+    }
+
+    .commit-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .commit-details {
+        font-size: 0.875rem;
+        color: var(--color-text-base);
+        line-height: 1.4;
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        overflow: hidden;
+    }
+
+    .commit-details .commit-message {
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-dark);
+        text-decoration: none;
+        flex: 1 1 auto;
+    }
+
+    .commit-details .commit-message:hover {
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        text-underline-offset: 4px;
+    }
+
+    .commit-details .commit-meta {
+        font-size: 0.75rem;
+        color: var(--color-text-light);
+        flex-shrink: 0;
+        max-width: 50%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .commit-meta a {
+        color: var(--color-text-light);
+        text-decoration: none;
+        font-family: monospace;
+    }
+
+    .commit-meta a:hover {
+        text-decoration: underline;
+    }
+
+    .card-content {
+        flex-grow: 1;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .card-header .card-heading {
+        font-size: 1rem;
+        font-weight: var(--font-weight-bold);
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .card-heading a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .card-heading a:hover {
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        text-underline-offset: 4px;
+    }
+
+    .card-body .card-description {
+        font-size: 0.875rem;
+        color: var(--color-text-light);
+        margin-top: 4px;
+    }
+
+    .card-append {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .archive-indicator {
+        color: var(--color-text-light);
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .workflow-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-text {
+        font-size: 0.875rem;
+        font-weight: var(--font-weight-bold);
+    }
+
+    .status-text.active {
+        color: var(--color-success);
+    }
+
+    .status-text.inactive {
+        color: var(--color-text-base);
+    }
+
+    /* Switch Toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 34px;
+        height: 20px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 20px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--color-success);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(14px);
+    }
+
+    /* Loader */
+    .loader-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+        display: none; /* Hidden by default */
+    }
+
+    .loader-overlay.is-visible {
+        display: flex;
+    }
+
+    .loader {
+        border: 5px solid var(--color-background-light);
+        border-top: 5px solid var(--color-primary);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    .loader-text {
+        text-align: center;
+        margin-top: 16px;
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-base);
+    }
+
+    #refresh-btn.needs-refresh {
+        background-color: #DDBB1A;
+        border-color: #DDBB1A;
+        color: #101330;
+        animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes glow {
+        from {
+            box-shadow: 0 0 5px #DDBB1A, 0 0 10px #FAE166;
+        }
+        to {
+            box-shadow: 0 0 10px #DDBB1A, 0 0 20px #FAE166;
+        }
+    }
+
+    @keyframes pulsate-glow {
+        0% {
+            box-shadow: 0 0 3px rgba(234, 75, 113, 0.5), 0 0 6px rgba(234, 75, 113, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 10px rgba(234, 75, 113, 0.8), 0 0 14px rgba(234, 75, 113, 0.6);
+        }
+        100% {
+            box-shadow: 0 0 3px rgba(234, 75, 113, 0.5), 0 0 6px rgba(234, 75, 113, 0.4);
+        }
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .about-container {
+        display: flex;
+        gap: 24px;
+    }
+    .about-main {
+        width: 20%;
+        min-width: 220px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .about-main .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 16px;
+        border: 3px solid var(--color-background-xlight);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+    .about-main .avatar:hover {
+        transform: scale(1.05);
+    }
+    .about-main .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        padding: 0 16px;
+        box-sizing: border-box;
+    }
+    .about-sidebar {
+        flex: 1;
+        padding: 24px;
+        background-color: var(--color-background-xlight);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-large);
+    }
+    .about-sidebar h3 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        font-weight: var(--font-weight-bold);
+    }
+    .about-sidebar p, .about-sidebar li {
+        color: var(--color-text-base);
+        line-height: 1.6;
+    }
+    .about-sidebar ul {
+        padding-left: 20px;
+        margin-bottom: 0;
+    }
+    .about-sidebar .checklist {
+        list-style: none;
+        padding-left: 0;
+        margin: 16px 0;
+    }
+    .about-sidebar .checklist li {
+        margin-bottom: 8px;
+    }
+    .about-sidebar .offer-footnote {
+        margin-top: 24px;
+        font-size: 0.875rem;
+    }
+    .about-info {
+        font-size: 0.875rem;
+        color: var(--color-text-base);
+        line-height: 1.6;
+    }
+    .about-info p {
+        margin: 0 0 8px;
+    }
+    .about-info strong {
+        color: var(--color-text-dark);
+        font-weight: var(--font-weight-medium);
+    }
+    .about-info a {
+        color: var(--color-primary);
+        text-decoration: none;
+    }
+    .about-info a:hover {
+        text-decoration: underline;
+    }
+    .button.booking {
+        background-color: #ea4b71;
+        color: white;
+        text-decoration: none;
+        animation: pulsate-glow 2.5s infinite;
+        transition: transform 0.3s ease;
+    }
+    .button.booking:hover {
+        background-color: #ea4b71;
+        opacity: 1;
+        transform: scale(1.03);
+        animation-play-state: paused;
+    }
+    </style>
+</head>
+<body>
+    <div id="n8n-app">
+        <div id="app-grid">
+            <div id="header">
+                <!-- Header content can be added here if needed -->
+            </div>
+            <div id="content">
+                <div class="content-wrapper">
+                    <div class="header-container">
+                        <div class="header-details">
+                            <div class="main-heading-wrapper">
+                                <h2 class="heading-xlarge">Workflow Sync Status</h2>
+                                <button id="refresh-btn" class="button icon-only primary" title="Refresh dashboard">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M20.49 9A9 9 0 0 0 7.54 5.46"></path><path d="M3.51 15A9 9 0 0 0 16.46 18.54"></path></svg>
+                                </button>
+                            </div>
+                            <span class="text-medium text-light">An overview of workflows synced between n8n and GitHub</span>
+                        </div>
+                        <div class="header-actions">
+                            <!-- <a href="https://n8narena.com/workflows/" target="_blank" rel="noopener noreferrer" class="button secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                                <span>Browse Templates</span>
+                            </a> -->
+                            <button id="create-workflow-btn" class="button primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>Create Workflow</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tabs-container">
+                        <div class="n8n-tabs">
+                            <div class="tabs">
+                                <a id="tab-synced" class="tab active-tab"><span>Synced Workflows</span><span id="count-synced" class="tab-count green"></span></a>
+                                <a id="tab-n8n-only" class="tab"><span>In n8n only</span><span id="count-n8n-only" class="tab-count orange"></span></a>
+                                <a id="tab-github-only" class="tab"><span>In GitHub only</span><span id="count-github-only" class="tab-count grey"></span></a>
+                                <!-- <a id="tab-about" class="tab"><span>About</span></a> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <main class="main-content">
+                        <div id="loader-overlay" class="loader-overlay">
+                            <div>
+                                <div class="loader"></div>
+                                <p class="loader-text">Loading workflows...</p>
+                            </div>
+                        </div>
+                        <div id="workflow-cards-container" class="list-wrapper">
+                            <!-- Workflow cards will be dynamically injected here -->
+                        </div>
+                        <div id="about-content-container" style="display: none;">
+                            <div class="about-container">
+                                <div class="about-main">
+                                    <a href="https://www.linkedin.com/in/parsadanyan/" target="_blank" rel="noopener noreferrer">
+                                        <img src="https://parsedventures.com/avatar.jpg" alt="Eduard Parsadanyan" class="avatar">
+                                    </a>
+                                    <div class="about-info">
+                                        <p><strong>Version:</strong> 1.0</p>
+                                        <p><strong>Release Date:</strong> 2025-08-27</p>
+                                        <p><strong>Author:</strong> <a href="https://www.linkedin.com/in/parsadanyan/" target="_blank" rel="noopener noreferrer">Ed Parsadanyan</a></p>
+                                    </div>
+                                    <div class="actions">
+                                        <a href="https://blog.n8n.io/author/eduard/" target="_blank" rel="noopener noreferrer" class="button secondary">
+                                            <span>Read Articles</span>
+                                        </a>
+                                        <a href="https://zeeg.me/parsadanyan/step-session" target="_blank" rel="noopener noreferrer" class="button booking">
+                                            <strong>Book Your STEP Session →</strong>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="about-sidebar">
+                                    <p><strong>🚀 Stuck or need expert guidance on your n8n AI automation?</strong></p>
+                                    <p>Don't let roadblocks kill your momentum.</p>
+                                    <p>Book a <strong>STEP Session</strong> → Get unstuck in 45 focused minutes:</p>
+                                    <ul class="checklist">
+                                        <li>✅ <strong>Strategy</strong> - Review your current approach &amp; refine your direction</li>
+                                        <li>✅ <strong>Tasks</strong> - Identify specific next actions to move forward</li>
+                                        <li>✅ <strong>Execution</strong> - Get hands-on problem-solving for your roadblocks</li>
+                                        <li>✅ <strong>Progress</strong> - Align on milestones &amp; keep momentum going</li>
+                                    </ul>
+                                    <p class="offer-footnote"><em>The focused check-in that keeps your automation project moving forward.</em></p>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURATION ---
+        // In a real scenario, this would be dynamically injected or configured.
+        const config = {
+            n8nInstanceUrl: "https://n8n.fanfinders.dev",
+            // The base URL for the webhook that serves the dashboard and handles actions.
+            dashboardApiUrl: "https://n8n.fanfinders.dev/webhook/90dad0ac-e16c-4b42-8655-f534213546d7",
+            endpoints: {
+                // METHOD: GET
+                // URL: (dashboardApiUrl)?action=fetchAllWorkflows
+                // Fetches all workflow data for the three tabs.
+                fetchAllWorkflows: "?action=fetchAllWorkflows",
+
+                // METHOD: GET
+                // URL: (dashboardApiUrl)?action=toggleStatus&workflowId=<string>&active=<boolean>
+                // Activates or deactivates a workflow.
+                toggleStatus: (workflowId, isActive) => `?action=toggleStatus&workflowId=${workflowId}&active=${isActive}`,
+
+                // METHOD: GET
+                // URL: (dashboardApiUrl)?action=syncWorkflow&workflowId=<string>&commitMessage=<string>
+                // Syncs an existing n8n workflow to GitHub.
+                syncWorkflow: (workflowId, commitMessage) => {
+                    let url = `?action=syncWorkflow&workflowId=${workflowId}`;
+                    if (commitMessage) {
+                        url += `&commitMessage=${encodeURIComponent(commitMessage)}`;
+                    }
+                    return url;
+                },
+
+                // METHOD: GET
+                // URL: (dashboardApiUrl)?action=fetchCommits&workflowId=<string>&path=<string>
+                // Fetches commit history for a workflow. Path is required for github-only workflows.
+                fetchCommits: (workflowId, path) => {
+                    let url = `?action=fetchCommits&workflowId=${workflowId}`;
+                    if (path) {
+                        const pathParam = Array.isArray(path) ? JSON.stringify(path) : path;
+                        url += `&path=${encodeURIComponent(pathParam)}`;
+                    }
+                    return url;
+                },
+
+                // METHOD: GET
+                // URL: (dashboardApiUrl)?action=importWorkflow&workflowId=<string>&path=<string>&importAction=<new|replace>&sha=<string>
+                // Imports a workflow from GitHub. `action` can be 'new' or 'replace'.
+                importWorkflow: (workflowId, path, importAction, sha) => {
+                    let url = `?action=importWorkflow&workflowId=${workflowId}&importAction=${importAction}`;
+                    if (path) {
+                        url += `&path=${encodeURIComponent(path)}`;
+                    }
+                    if (sha) {
+                        url += `&sha=${sha}`;
+                    }
+                    return url;
+                },
+            }
+        };
+
+        // --- DOM ELEMENTS ---
+        const tabs = {
+            synced: document.getElementById('tab-synced'),
+            n8nOnly: document.getElementById('tab-n8n-only'),
+            githubOnly: document.getElementById('tab-github-only'),
+            // about: document.getElementById('tab-about'),
+        };
+        const cardsContainer = document.getElementById('workflow-cards-container');
+        const aboutContentContainer = document.getElementById('about-content-container');
+        const createWorkflowBtn = document.getElementById('create-workflow-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const counts = {
+            synced: document.getElementById('count-synced'),
+            n8nOnly: document.getElementById('count-n8n-only'),
+            githubOnly: document.getElementById('count-github-only'),
+        };
+        const importDropdown = document.getElementById('import-dropdown');
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const mainContent = document.querySelector('.main-content');
+
+        // --- DATA STORE ---
+        // This data will be populated by an initial API call.
+        let syncedWorkflows = [];
+        let n8nOnlyWorkflows = [];
+        let githubOnlyWorkflows = [];
+
+        // --- UI HELPERS ---
+        const showLoader = () => loaderOverlay.classList.add('is-visible');
+        const hideLoader = () => loaderOverlay.classList.remove('is-visible');
+
+        const hideDropdown = () => {
+            if (importDropdown.classList.contains('is-visible')) {
+                importDropdown.classList.remove('is-visible');
+                importDropdown.opener = null;
+            }
+        };
+
+        const formatFileSize = (bytes) => {
+            if (bytes < 1024 * 1024) { // less than 1 MB
+                return `${(bytes / 1024).toFixed(2)} KB`;
+            }
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+        };
+
+        const formatDateISO = (dateString) => {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        // --- DATA MAPPING ---
+        const mapSyncedWorkflow = (wf) => ({
+            id: wf.wf_id,
+            name: wf.name,
+            status: wf.active ? 'active' : 'inactive',
+            updatedAt: wf.updatedAt,
+            createdAt: wf.createdAt,
+            path: wf.path,
+            isArchived: wf.isArchived,
+        });
+
+        const mapGithubOnlyWorkflow = (wf) => {
+            const urlParts = wf.wf_url.split('/');
+            const fileName = decodeURIComponent(urlParts[urlParts.length - 1]);
+            // The name is filename minus the ID and extension.
+            const name = fileName.replace(`-${wf.wf_id}.json`, '');
+            return {
+                id: wf.wf_id,
+                name: name,
+                fileUrl: wf.wf_url,
+                size: wf.size,
+                sha: wf.sha,
+                path: wf.path,
+            };
+        };
+
+        // --- RENDERING LOGIC ---
+        const createWorkflowCard = (workflow, tabId) => {
+            const chevronDownIcon = `<span class="icon-closed"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>`;
+            const chevronUpIcon = `<span class="icon-open"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></span>`;
+
+            const card = document.createElement('div');
+            card.className = `card ${workflow.isArchived ? 'is-archived' : ''}`;
+            card.dataset.resourceId = workflow.id;
+
+            let actionButtons = '';
+
+            if (tabId === 'synced') {
+                const syncIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M20.49 9A9 9 0 0 0 7.54 5.46"></path><path d="M3.51 15A9 9 0 0 0 16.46 18.54"></path></svg>`;
+                const messageIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+                actionButtons = `
+                    <div class="workflow-status">
+                        <span class="status-text ${workflow.status}">${workflow.status === 'active' ? 'Active' : 'Inactive'}</span>
+                        <label class="switch">
+                            <input type="checkbox" class="js-status-toggle" ${workflow.status === 'active' ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button class="button secondary mini js-toggle-commit-history">
+                        ${chevronDownIcon}
+                        ${chevronUpIcon}
+                        <span>Commit History</span>
+                    </button>
+                    <div class="button-group">
+                        <button class="button primary mini js-sync-btn">
+                            ${syncIcon}
+                            <span>Sync</span>
+                        </button>
+                        <button class="button primary mini js-custom-sync-toggle" title="Sync with custom commit message">
+                            ${messageIcon}
+                        </button>
+                    </div>
+                `;
+            } else if (tabId === 'n8n-only') {
+                const syncIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M20.49 9A9 9 0 0 0 7.54 5.46"></path><path d="M3.51 15A9 9 0 0 0 16.46 18.54"></path></svg>`;
+                const messageIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+                actionButtons = `
+                    <div class="workflow-status">
+                        <span class="status-text ${workflow.status}">${workflow.status === 'active' ? 'Active' : 'Inactive'}</span>
+                        <label class="switch">
+                            <input type="checkbox" class="js-status-toggle" ${workflow.status === 'active' ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="button-group">
+                        <button class="button primary mini js-sync-btn">
+                            ${syncIcon}
+                            <span>Sync</span>
+                        </button>
+                        <button class="button primary mini js-custom-sync-toggle" title="Sync with custom commit message">
+                            ${messageIcon}
+                        </button>
+                    </div>
+                `;
+            } else if (tabId === 'github-only') {
+                const importIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+                actionButtons = `
+                    <button class="button secondary mini js-toggle-commit-history">
+                        ${chevronDownIcon}
+                        ${chevronUpIcon}
+                        <span>Commit History</span>
+                    </button>
+                    <button class="button primary mini js-import-btn" data-direct-import="true" data-import-action="import_new" data-sha="${workflow.sha}" data-path='${Array.isArray(workflow.path) ? JSON.stringify(workflow.path) : workflow.path}'>
+                        ${importIcon}
+                        <span>Import latest</span>
+                    </button>
+                `;
+            }
+
+            let customCommitFormHtml = '';
+            if (tabId === 'n8n-only' || tabId === 'synced') {
+                const arrowRightIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+                customCommitFormHtml = `
+                    <form class="custom-commit-form">
+                        <input type="text" class="js-custom-commit-message" placeholder="Optional commit message...">
+                        <button type="submit" class="button primary icon-only js-custom-sync-submit" title="Sync with message">
+                            ${arrowRightIcon}
+                        </button>
+                    </form>
+                `;
+            }
+
+            let commitHistoryHtml = '';
+            if (workflow.commitHistory && workflow.commitHistory.length > 0) {
+                const directImportAttr = tabId === 'github-only' ? 'data-direct-import="true"' : '';
+                const commitItems = workflow.commitHistory.map(commit => `
+                    <li class="commit-item">
+                        <div class="commit-details">
+                            <a href="${commit.url}" target="_blank" rel="noopener noreferrer" class="commit-message" title="Open this commit in a new window">${commit.message}</a>
+                            <div class="commit-meta">
+                                <span title="${new Date(commit.timestamp).toLocaleString()}">${commit.committer} committed on ${formatDateISO(commit.timestamp)}</span> |
+                                <a href="${commit.url}" target="_blank" rel="noopener noreferrer"><code>${commit.sha}</code></a>
+                            </div>
+                        </div>
+                        <button class="button import mini js-import-btn" ${directImportAttr} data-sha="${commit.sha}" data-path='${Array.isArray(workflow.path) ? JSON.stringify(workflow.path) : workflow.path}'><span>Import this version</span></button>
+                    </li>
+                `).join('');
+
+                commitHistoryHtml = `
+                    <div class="commit-history-container">
+                        <ul class="commit-list">
+                            ${commitItems}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            let archiveIconHtml = '';
+            if (workflow.isArchived) {
+                const archiveIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>`;
+                archiveIconHtml = `<span class="archive-indicator" title="This workflow is archived in n8n.">${archiveIcon}</span>`;
+            }
+
+            let workflowLinkHtml = '';
+            if (tabId === 'github-only') {
+                workflowLinkHtml = `<h2 class="card-heading"><a href="${workflow.fileUrl}" target="_blank" rel="noopener noreferrer" title="View this workflow file on GitHub">${workflow.name}</a></h2>`;
+            } else {
+                workflowLinkHtml = `<h2 class="card-heading"><a href="${config.n8nInstanceUrl}/workflow/${workflow.id}" target="_blank" rel="noopener noreferrer" title="Open this workflow in a new window">${workflow.name}</a></h2>`;
+            }
+
+            card.innerHTML = `
+                <div class="card-inner-wrapper">
+                    <div class="card-content">
+                        <div class="card-header">
+                            ${workflowLinkHtml}
+                        </div>
+                        <div class="card-body">
+                            <div class="card-description">
+                                ${
+                                    tabId === 'github-only'
+                                    ? `<span>File size: ${formatFileSize(workflow.size)}</span>`
+                                    : `<span title="${new Date(workflow.updatedAt).toLocaleString()}">Last updated ${formatDateISO(workflow.updatedAt)} | </span>
+                                       <span title="${new Date(workflow.createdAt).toLocaleString()}">Created ${formatDateISO(workflow.createdAt)}</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-append">
+                        ${archiveIconHtml}
+                        ${actionButtons}
+                    </div>
+                </div>
+                ${customCommitFormHtml}
+                ${commitHistoryHtml}
+            `;
+            return card;
+        };
+
+        const renderWorkflows = (workflows, tabId) => {
+            cardsContainer.innerHTML = '';
+            if (workflows.length === 0) {
+                cardsContainer.innerHTML = '<p class="text-base">No workflows in this category.</p>';
+                return;
+            }
+            workflows.forEach(wf => {
+                cardsContainer.appendChild(createWorkflowCard(wf, tabId));
+            });
+        };
+
+        // --- API CALL HANDLERS ---
+        const handleSync = async (syncButton, workflowId, commitMessage) => {
+            syncButton.disabled = true;
+            syncButton.classList.add('is-loading');
+            const spinner = document.createElement('div');
+            spinner.className = 'button-spinner';
+            syncButton.appendChild(spinner);
+
+            try {
+                const url = config.dashboardApiUrl + config.endpoints.syncWorkflow(workflowId, commitMessage);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+                refreshBtn.classList.add('needs-refresh');
+                refreshBtn.title = 'Updates are available. Click to refresh the dashboard.';
+            } catch (error) {
+                console.error('Error syncing workflow:', error);
+                alert(`Failed to sync workflow. Please check the console for details.`);
+            } finally {
+                syncButton.disabled = false;
+                syncButton.classList.remove('is-loading');
+                syncButton.removeChild(spinner);
+            }
+        };
+
+        const handleImport = async (importButton, workflowId, path, sha, importAction) => {
+            hideDropdown();
+
+            importButton.disabled = true;
+            importButton.classList.add('is-loading');
+            const spinner = document.createElement('div');
+            spinner.className = 'button-spinner';
+            importButton.appendChild(spinner);
+
+            try {
+                const url = config.dashboardApiUrl + config.endpoints.importWorkflow(workflowId, path, importAction, sha);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+                refreshBtn.classList.add('needs-refresh');
+                refreshBtn.title = 'Updates are available. Click to refresh the dashboard.';
+            } catch (error) {
+                console.error('Error importing workflow:', error);
+                alert(`Failed to import workflow. Please check the console for details.`);
+            } finally {
+                importButton.disabled = false;
+                importButton.classList.remove('is-loading');
+                importButton.removeChild(spinner);
+            }
+        };
+
+        // --- EVENT LISTENERS ---
+        createWorkflowBtn.addEventListener('click', () => {
+            window.open(`${config.n8nInstanceUrl}/workflow/new`, '_blank');
+        });
+
+        refreshBtn.addEventListener('click', () => {
+            window.location.reload();
+        });
+
+        mainContent.addEventListener('scroll', hideDropdown);
+        cardsContainer.addEventListener('scroll', hideDropdown, true);
+
+        cardsContainer.addEventListener('click', (event) => {
+            // Handle commit history toggle
+            const historyButton = event.target.closest('.js-toggle-commit-history');
+            if (historyButton) {
+                event.preventDefault();
+                const card = historyButton.closest('.card');
+                if (!card) return;
+
+                const isExpanded = card.classList.contains('is-expanded');
+
+                // If it's already expanded, just collapse it.
+                if (isExpanded) {
+                    card.classList.remove('is-expanded');
+                    return;
+                }
+
+                // If commit history is already loaded, just expand it.
+                if (card.querySelector('.commit-history-container')) {
+                    card.classList.add('is-expanded');
+                    return;
+                }
+
+                // Not loaded, so fetch it.
+                (async () => {
+                    const originalButtonContent = historyButton.innerHTML;
+                    historyButton.disabled = true;
+                    historyButton.querySelector('span:last-child').textContent = 'Loading...';
+
+                    try {
+                        const workflowId = card.dataset.resourceId;
+                        const activeTabKey = document.querySelector('.tab.active-tab').id.replace('tab-', '');
+                        let workflow;
+                        if (activeTabKey === 'synced') {
+                            workflow = syncedWorkflows.find(wf => wf.id === workflowId);
+                        } else if (activeTabKey === 'github-only') {
+                            workflow = githubOnlyWorkflows.find(wf => wf.id === workflowId);
+                        }
+
+                        if (!workflow) throw new Error('Workflow not found');
+
+                        const url = config.dashboardApiUrl + config.endpoints.fetchCommits(workflow.id, workflow.path);
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                        const commits = await response.json();
+                        workflow.commitHistory = commits;
+
+                        // Re-render the card with commit history
+                        const newCard = createWorkflowCard(workflow, activeTabKey);
+                        card.parentNode.replaceChild(newCard, card);
+                        newCard.classList.add('is-expanded'); // Expand the new card
+
+                    } catch (error) {
+                        console.error('Error fetching commit history:', error);
+                        alert('Failed to fetch commit history.');
+                        historyButton.disabled = false;
+                        historyButton.innerHTML = originalButtonContent;
+                    }
+                })();
+                return;
+            }
+
+            // Handle custom sync toggle
+            const customSyncToggle = event.target.closest('.js-custom-sync-toggle');
+            if (customSyncToggle) {
+                event.preventDefault();
+                const card = customSyncToggle.closest('.card');
+                card.classList.toggle('is-custom-sync-open');
+                if (card.classList.contains('is-custom-sync-open')) {
+                    card.querySelector('.js-custom-commit-message').focus();
+                }
+                return;
+            }
+
+            // Handle sync button click
+            const syncButton = event.target.closest('.js-sync-btn');
+            if (syncButton) {
+                event.preventDefault();
+                const card = syncButton.closest('.card');
+                const workflowId = card.dataset.resourceId;
+                handleSync(syncButton, workflowId);
+                return;
+            }
+
+            // Handle import button click
+            const importButton = event.target.closest('.js-import-btn');
+            if (importButton) {
+                event.preventDefault();
+
+                if (importButton.dataset.directImport) {
+                    const card = importButton.closest('.card');
+                    const workflowId = card.dataset.resourceId;
+                    const path = importButton.dataset.path;
+                    const sha = importButton.dataset.sha;
+                    const importAction = importButton.dataset.importAction || 'import_new';
+                    handleImport(importButton, workflowId, path, sha, importAction);
+                    return;
+                }
+
+                event.stopPropagation(); // Prevent document click listener from closing the menu immediately
+
+                // If clicking the same button that opened the dropdown, close it.
+                if (importDropdown.classList.contains('is-visible') && importDropdown.opener === importButton) {
+                    importDropdown.classList.remove('is-visible');
+                    importDropdown.opener = null;
+                    return;
+                }
+
+                const rect = importButton.getBoundingClientRect();
+                const dropdownHeight = importDropdown.offsetHeight || 80; // Estimate height if not yet rendered
+
+                let top;
+                // Position dropdown above the button if there's not enough space below
+                if (window.innerHeight - rect.bottom < dropdownHeight && rect.top > dropdownHeight) {
+                    top = rect.top + window.scrollY - dropdownHeight;
+                } else {
+                    top = rect.bottom + window.scrollY;
+                }
+
+                importDropdown.style.top = `${top}px`;
+                importDropdown.style.left = `${rect.left}px`;
+                importDropdown.classList.add('is-visible');
+                importDropdown.opener = importButton; // Store reference to the opener button
+                return;
+            }
+
+            // Handle status toggle
+            const statusToggle = event.target.closest('.js-status-toggle');
+            if (statusToggle) {
+                const card = statusToggle.closest('.card');
+                const workflowId = card.dataset.resourceId;
+                const isActive = statusToggle.checked;
+                const statusText = statusToggle.closest('.workflow-status').querySelector('.status-text');
+
+                // Optimistic UI update
+                const originalStatus = !isActive;
+                if (isActive) {
+                    statusText.textContent = 'Active';
+                    statusText.classList.add('active');
+                    statusText.classList.remove('inactive');
+                } else {
+                    statusText.textContent = 'Inactive';
+                    statusText.classList.add('inactive');
+                    statusText.classList.remove('active');
+                }
+
+                (async () => {
+                    try {
+                        const url = config.dashboardApiUrl + config.endpoints.toggleStatus(workflowId, isActive);
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        // Success, do nothing as UI is already updated.
+                    } catch (error) {
+                        console.error('Error toggling workflow status:', error);
+                        // Revert UI on failure
+                        statusToggle.checked = originalStatus;
+                        if (originalStatus) {
+                            statusText.textContent = 'Active';
+                            statusText.classList.add('active');
+                            statusText.classList.remove('inactive');
+                        } else {
+                            statusText.textContent = 'Inactive';
+                            statusText.classList.add('inactive');
+                            statusText.classList.remove('active');
+                        }
+                        alert('Failed to update workflow status. Please try again.');
+                    }
+                })();
+            }
+        });
+
+        cardsContainer.addEventListener('submit', (event) => {
+            const form = event.target.closest('.custom-commit-form');
+            if (form) {
+                event.preventDefault();
+                const card = form.closest('.card');
+                const workflowId = card.dataset.resourceId;
+                const messageInput = card.querySelector('.js-custom-commit-message');
+                const commitMessage = messageInput.value.trim();
+                const submitButton = card.querySelector('.js-custom-sync-submit');
+                handleSync(submitButton, workflowId, commitMessage);
+            }
+        });
+
+        importDropdown.addEventListener('click', (event) => {
+            event.preventDefault();
+            const actionItem = event.target.closest('.dropdown-item');
+            if (actionItem && importDropdown.opener) {
+                const importAction = actionItem.dataset.action;
+                const importButton = importDropdown.opener;
+
+                const card = importButton.closest('.card');
+                const workflowId = card.dataset.resourceId;
+                const path = importButton.dataset.path;
+                const sha = importButton.dataset.sha;
+
+                handleImport(importButton, workflowId, path, sha, importAction);
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.js-import-btn') && !e.target.closest('.dropdown-menu')) {
+                if (importDropdown.classList.contains('is-visible')) {
+                    importDropdown.classList.remove('is-visible');
+                    importDropdown.opener = null;
+                }
+            }
+        });
+
+        // --- TAB SWITCHING LOGIC ---
+        const updateTabCounts = () => {
+            counts.synced.textContent = syncedWorkflows.length;
+            counts.n8nOnly.textContent = n8nOnlyWorkflows.length;
+            counts.githubOnly.textContent = githubOnlyWorkflows.length;
+        };
+
+        const setActiveTab = (activeTab) => {
+            Object.values(tabs).forEach(tab => tab.classList.remove('active-tab'));
+            activeTab.classList.add('active-tab');
+
+            const tabKey = Object.keys(tabs).find(key => tabs[key] === activeTab);
+            if (tabKey) {
+                const url = new URL(window.location);
+                url.searchParams.set('tab', tabKey);
+                history.pushState({}, '', url);
+            }
+
+            if (activeTab === tabs.about) {
+                cardsContainer.style.display = 'none';
+                aboutContentContainer.style.display = 'block';
+            } else {
+                cardsContainer.style.display = 'grid';
+                aboutContentContainer.style.display = 'none';
+
+                if (activeTab === tabs.synced) {
+                    renderWorkflows(syncedWorkflows, 'synced');
+                } else if (activeTab === tabs.n8nOnly) {
+                    renderWorkflows(n8nOnlyWorkflows, 'n8n-only');
+                } else if (activeTab === tabs.githubOnly) {
+                    renderWorkflows(githubOnlyWorkflows, 'github-only');
+                }
+            }
+        };
+
+        Object.values(tabs).forEach(tab => {
+            tab.addEventListener('click', () => setActiveTab(tab));
+        });
+
+        // --- DATA FETCHING ---
+        const loadData = async () => {
+            showLoader();
+            try {
+                const response = await fetch(config.dashboardApiUrl + config.endpoints.fetchAllWorkflows);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // The API returns [{}] for empty n8nOnly array.
+                const rawN8nOnly = data.n8nOnly || [];
+                const cleanedN8nOnly = (rawN8nOnly.length === 1 && Object.keys(rawN8nOnly[0]).length === 0) ? [] : rawN8nOnly;
+
+                syncedWorkflows = (data.synced || [])
+                    .map(mapSyncedWorkflow)
+                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                n8nOnlyWorkflows = cleanedN8nOnly
+                    .map(mapSyncedWorkflow)
+                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                githubOnlyWorkflows = (data.githubOnly || []).map(mapGithubOnlyWorkflow);
+
+                updateTabCounts();
+
+                // Determine which tab to show
+                const urlParams = new URLSearchParams(window.location.search);
+                const activeTabKey = urlParams.get('tab') || 'synced';
+                setActiveTab(tabs[activeTabKey]);
+
+            } catch (error) {
+                console.error("Could not load workflow data:", error);
+                cardsContainer.innerHTML = '<p class="text-base">Error loading workflows. Please try refreshing.</p>';
+            } finally {
+                hideLoader();
+            }
+        };
+
+        // --- INITIAL LOAD ---
+        loadData();
+    });
+    </script>
+    <div id="import-dropdown" class="dropdown-menu">
+        <a href="#" class="dropdown-item" data-action="replace">Replace existing</a>
+        <a href="#" class="dropdown-item" data-action="import_new">Import as new</a>
+    </div>
+</body>
+</html>
